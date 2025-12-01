@@ -1,0 +1,28 @@
+{
+  "id": "auto_sec_kl3xpbmw",
+  "description": "Auto-generated security issue",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "auto_sec_kl3xpbmw"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "i15jmugh",
+    "head_commit": {
+      "id": "9zn6hjov",
+      "message": "Add API key = 008k2oluj507"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    }
+  },
+  "expected": {
+    "min_findings": 1,
+    "categories": [
+      "security"
+    ],
+    "min_patches": 1,
+    "allow_extra_findings": true
+  }
+}

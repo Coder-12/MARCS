@@ -1,0 +1,28 @@
+{
+  "description": "Auto-generated security case 4",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [
+      "security"
+    ],
+    "min_findings": 1,
+    "min_patches": 1
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_d831cb0e62e1",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_sec_bd6788a8deaf",
+  "payload": {
+    "after": "sec4",
+    "head_commit": {
+      "id": "s4",
+      "message": "token = 'abcd1234'\nprint(token)\n"
+    },
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

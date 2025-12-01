@@ -1,0 +1,30 @@
+{
+  "id": "case1_style_small",
+  "description": "Simple style issue (short)",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "1"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "before": "aaa",
+    "after": "bbb",
+    "repository": {"full_name": "me/repo"}
+  },
+  "expected": {
+    "min_findings": 1,
+    "max_findings": 5,
+    "categories": ["style"],
+    "min_patches": 0,
+    "allow_extra_findings": true
+  },
+  "expected_findings": [
+    {
+      "id": "style-1",
+      "category": "style",
+      "message": "line too long",
+      "suggested_patch": null
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "event_id": "evt123",
+  "repo": "me/repo",
+  "summary": "test",
+  "findings": [
+    {
+      "id": "sec-99",
+      "severity": "high",
+      "message": "hardcoded secret",
+      "confidence": 0.9,
+      "category": "security",
+      "location": null,
+      "explanation": "bad",
+      "evidence": null,
+      "evidence_links": null,
+      "fingerprint": null,
+      "linked_patches": null,
+      "evidence_score": null,
+      "suggested_patch": null,
+      "metadata": {},
+      "tests_to_run": null
+    }
+  ],
+  "suggested_patches": {
+    "sec-99": "# fakepatch"
+  },
+  "created_at": "2025-11-26 06:45:26.196057+00:00",
+  "metadata": {}
+}

@@ -1,0 +1,28 @@
+{
+  "id": "auto_sec_hxlb3mv8",
+  "description": "Auto-generated security issue",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "auto_sec_hxlb3mv8"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "66ql05cn",
+    "head_commit": {
+      "id": "bgou1bz6",
+      "message": "Add API key = o4lk9wxgvdv8"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    }
+  },
+  "expected": {
+    "min_findings": 1,
+    "categories": [
+      "security"
+    ],
+    "min_patches": 1,
+    "allow_extra_findings": true
+  }
+}

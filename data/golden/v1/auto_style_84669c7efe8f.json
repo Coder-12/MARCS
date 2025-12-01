@@ -1,0 +1,31 @@
+{
+  "description": "Auto-generated style case 3",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [
+      "style"
+    ],
+    "max_findings": 5,
+    "min_findings": 1,
+    "min_patches": 0
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_e62082af15a7",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_style_84669c7efe8f",
+  "payload": {
+    "after": "bbb",
+    "before": "aaa",
+    "head_commit": {
+      "id": "c3",
+      "message": "style: long line"
+    },
+    "patch": "def foo():\n    pass\n",
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

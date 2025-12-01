@@ -1,0 +1,27 @@
+{
+  "description": "Auto-generated empty case 0",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [],
+    "max_findings": 0,
+    "min_findings": 0,
+    "min_patches": 0
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_c53828a605e1",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_empty_65a243f48525",
+  "payload": {
+    "after": "empty0",
+    "head_commit": {
+      "id": "e0",
+      "message": ""
+    },
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

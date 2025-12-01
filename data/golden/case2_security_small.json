@@ -1,0 +1,20 @@
+{
+  "id": "case2_security_small",
+  "description": "Security secret in commit or PR body",
+  "headers": {
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "g2"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "abcd",
+    "head_commit": {"id": "abcd", "message": "Add secret token = abc123"},
+    "repository": {"full_name": "me/repo"}
+  },
+  "expected": {
+    "min_findings": 1,
+    "categories": ["security"],
+    "min_patches": 1,
+    "allow_extra_findings": true
+  }
+}

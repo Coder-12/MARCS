@@ -1,0 +1,28 @@
+{
+  "id": "test_evt_0001",
+  "description": "Golden smoke test for pipeline integration",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "golden_dlvy_test_evt_0001",
+    "X-GitHub-Event": "push"
+  },
+  "payload": {
+    "after": "commit123",
+    "ref": "refs/heads/main",
+    "head_commit": {
+      "id": "commit123",
+      "message": "add wrap usage"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    },
+    "patch": "\n*** Begin Patch\n*** Update File: sample.py\n@@\n-def old():\n-    pass\n+def old():\n+    wrap(old_call)\n*** End Patch\n"
+  },
+  "expected": {
+    "min_findings": 0,
+    "max_findings": 10,
+    "min_patches": 0,
+    "allow_extra_findings": true,
+    "categories": []
+  }
+}

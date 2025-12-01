@@ -1,0 +1,21 @@
+{
+  "id": "case3_edge_empty",
+  "description": "Empty/no-op payload should produce no findings",
+  "headers": {
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "g3"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "0000",
+    "head_commit": {"id": "0000", "message": ""},
+    "repository": {"full_name": "me/repo"}
+  },
+  "expected": {
+    "min_findings": 0,
+    "max_findings": 0,
+    "categories": [],
+    "min_patches": 0,
+    "allow_extra_findings": true
+  }
+}

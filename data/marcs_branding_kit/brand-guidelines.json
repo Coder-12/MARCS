@@ -1,0 +1,32 @@
+{
+  "name": "MARCS",
+  "tagline": "Multi-Agent Code Review System \u2014 Crash-safe \u2022 Journaled \u2022 Deterministic",
+  "colors": {
+    "primary": "#0b67ff",
+    "primary_gradient_start": "#0b67ff",
+    "primary_gradient_end": "#4cc1ff",
+    "accent": "#4cc1ff",
+    "muted": "#6b7280",
+    "background": "#f7f9fc"
+  },
+  "fonts": {
+    "primary": "Inter, Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif",
+    "monospace": "ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace"
+  },
+  "usage": {
+    "logo_clear_space": "Keep at least 16px space on all sides for the mark; for horizontal wordmark, 24px to left",
+    "logo_min_size": "Mark: 32x32px, Wordmark: width >= 160px",
+    "do_not": [
+      "Do not stretch logo non-uniformly",
+      "Do not recolor the wordmark other than palette",
+      "Do not place logo on noisy backgrounds without padding"
+    ]
+  },
+  "file_list": [
+    "marcs-logo.svg",
+    "marcs-mark.svg",
+    "marcs-social-card.svg",
+    "brand-guidelines.json",
+    "README_BRANDING_SNIPPET.md"
+  ]
+}

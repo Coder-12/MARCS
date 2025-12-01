@@ -1,0 +1,28 @@
+{
+  "description": "Auto-generated security case 1",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [
+      "security"
+    ],
+    "min_findings": 1,
+    "min_patches": 1
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_1f66bd168df2",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_sec_33adf92dbdee",
+  "payload": {
+    "after": "sec1",
+    "head_commit": {
+      "id": "s1",
+      "message": "PASSWORD = 'hunter2'\n"
+    },
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

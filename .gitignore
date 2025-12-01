@@ -1,0 +1,61 @@
+# ---- IDE / Editor ----
+.idea/
+.vscode/
+.DS_Store
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---- Virtualenv ----
+macrs-env/
+venv/
+ENV/
+
+# ---- Runtime artifacts ----
+artifacts/*
+!artifacts/.gitkeep
+
+backups/*
+!backups/.gitkeep
+
+journals/*
+!journals/.gitkeep
+
+logs/*
+!logs/.gitkeep
+
+# ---- OS / Tool caches ----
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# ---- Data & temp ----
+*.sqlite3
+*.db
+.binary
+*.bin
+
+data/macrs.sqlite3
+data/demo.gif
+
+# ---- Environment ----
+.env
+
+# ---- Local run/test files ----
+demo-repo/
+review.json
+review_out.json
+
+# ---- Misc ----
+*.swp
+*.swo
+
+DEMO_README.md
+verify_scripts
+binary.bin
+big_manual.txt
+demo_run.md
+local_init.sh
