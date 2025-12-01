@@ -39,7 +39,6 @@ logs/*
 *.bin
 
 data/macrs.sqlite3
-data/demo.gif
 
 # ---- Environment ----
 .env
