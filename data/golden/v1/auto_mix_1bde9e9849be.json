@@ -1,0 +1,30 @@
+{
+  "description": "Auto-generated mixed case 0",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [
+      "style",
+      "security"
+    ],
+    "min_findings": 1,
+    "min_patches": 0
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_b245fc9d986d",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_mix_1bde9e9849be",
+  "payload": {
+    "after": "mix0",
+    "head_commit": {
+      "id": "m0",
+      "message": "mix issue"
+    },
+    "patch": "# long line\nyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\nSECRET='s'\n",
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

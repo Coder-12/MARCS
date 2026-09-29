@@ -1,0 +1,27 @@
+{
+  "event_id": "no_golden_999",
+  "repo": "me/repo",
+  "summary": null,
+  "findings": [
+    {
+      "id": "x1",
+      "severity": "low",
+      "message": "x",
+      "confidence": 0.0,
+      "category": "style",
+      "location": null,
+      "explanation": null,
+      "evidence": null,
+      "evidence_links": null,
+      "fingerprint": null,
+      "linked_patches": null,
+      "evidence_score": null,
+      "suggested_patch": null,
+      "metadata": {},
+      "tests_to_run": null
+    }
+  ],
+  "suggested_patches": {},
+  "created_at": "2025-11-26 06:45:26.200084+00:00",
+  "metadata": {}
+}

@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+
+pydantic
+python-dotenv
+
+psycopg2-binary
+
+redis
+
+rq    # For background worker jobs (simple, reliable)
+
+pydantic-settings

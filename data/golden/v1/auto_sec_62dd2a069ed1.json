@@ -1,0 +1,28 @@
+{
+  "description": "Auto-generated security case 2",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [
+      "security"
+    ],
+    "min_findings": 1,
+    "min_patches": 1
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_b3f2be1ef243",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_sec_62dd2a069ed1",
+  "payload": {
+    "after": "sec2",
+    "head_commit": {
+      "id": "s2",
+      "message": "token = 'abcd1234'\nprint(token)\n"
+    },
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

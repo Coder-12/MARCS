@@ -1,0 +1,11 @@
+{
+  "id": "evt123",
+  "expected_findings": [
+    {
+      "id": "sec-99",
+      "category": "security",
+      "message": "hardcoded secret",
+      "suggested_patch": null
+    }
+  ]
+}

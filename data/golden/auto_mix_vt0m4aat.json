@@ -1,0 +1,26 @@
+{
+  "id": "auto_mix_vt0m4aat",
+  "description": "Auto-generated mixed case",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "auto_mix_vt0m4aat"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "emcuoemq",
+    "head_commit": {
+      "id": "zvfzjx0o",
+      "message": "Improve style and fix logging"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    }
+  },
+  "expected": {
+    "min_findings": 1,
+    "min_patches": 0,
+    "allow_extra_findings": true,
+    "categories": []
+  }
+}

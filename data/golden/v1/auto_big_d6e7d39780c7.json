@@ -1,0 +1,28 @@
+{
+  "description": "Auto-generated large diff case 0",
+  "expected": {
+    "allow_extra_findings": true,
+    "categories": [],
+    "max_findings": 50,
+    "min_findings": 0,
+    "min_patches": 0
+  },
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Delivery": "dlv_f39a0e51c4e2",
+    "X-GitHub-Event": "push"
+  },
+  "id": "auto_big_d6e7d39780c7",
+  "payload": {
+    "after": "big0",
+    "head_commit": {
+      "id": "b0",
+      "message": "big diff"
+    },
+    "patch": "\n*** Begin Patch\n*** Update File: big_module.py\n@@\n-def old_fn():\n-    pass\n+def old_fn():\n+    # replaced implementation\n+    for i in range(100):\n+        pass\n@@\n+def new_fn():\n+    # new function added\n+    return True\n*** End Patch\n",
+    "ref": "refs/heads/main",
+    "repository": {
+      "full_name": "me/repo"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#0b67ff"/>
+      <stop offset="1" stop-color="#4cc1ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="none"/>
+  <!-- Mark -->
+  <g transform="translate(60,60)">
+    <rect x="0" y="0" width="120" height="120" rx="20" fill="url(#g)"/>
+    <text x="60" y="78" font-family="Inter, Roboto, system-ui, sans-serif" font-weight="800" font-size="64" fill="#fff" text-anchor="middle" alignment-baseline="middle">M</text>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(220,120)">
+    <text x="0" y="0" font-family="Inter, Roboto, system-ui, sans-serif" font-weight="800" font-size="56" fill="#0b67ff">MARCS</text>
+    <text x="0" y="36" font-family="Inter, Roboto, system-ui, sans-serif" font-weight="500" font-size="18" fill="#6b7280">Multi-Agent Code Review System</text>
+  </g>
+</svg>

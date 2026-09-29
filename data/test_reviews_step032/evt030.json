@@ -1,0 +1,14 @@
+{
+  "event_id": "evt030",
+  "repo": "me/repo",
+  "summary": "Aggregated 0 findings from 4 agent results",
+  "findings": [],
+  "suggested_patches": {},
+  "created_at": "2025-11-26 06:45:26.943409+00:00",
+  "metadata": {
+    "trace_id": "4fba9cb42810c3645945f9591f57d2e4",
+    "patch_rejections": {},
+    "fingerprint_index": {},
+    "selected_patches": {}
+  }
+}

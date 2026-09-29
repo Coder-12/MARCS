@@ -1,0 +1,36 @@
+{
+  "id": "auto_style_7nkur14c",
+  "description": "Auto-generated style issue",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "auto_style_7nkur14c"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "ve493crs",
+    "head_commit": {
+      "id": "l217xic6",
+      "message": "Refactor: long lines, missing docstring"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    }
+  },
+  "expected": {
+    "min_findings": 1,
+    "categories": [
+      "style"
+    ],
+    "min_patches": 0,
+    "allow_extra_findings": true
+  },
+  "expected_findings": [
+    {
+      "id": "style-auto",
+      "category": "style",
+      "message": "long line",
+      "suggested_patch": null
+    }
+  ]
+}

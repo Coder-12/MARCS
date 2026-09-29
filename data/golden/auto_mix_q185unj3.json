@@ -1,0 +1,26 @@
+{
+  "id": "auto_mix_q185unj3",
+  "description": "Auto-generated mixed case",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "auto_mix_q185unj3"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "c6a9oe4s",
+    "head_commit": {
+      "id": "fcu0friq",
+      "message": "Fix long lines and add token abc123"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    }
+  },
+  "expected": {
+    "min_findings": 1,
+    "min_patches": 0,
+    "allow_extra_findings": true,
+    "categories": []
+  }
+}

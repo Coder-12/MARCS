@@ -1,0 +1,28 @@
+{
+  "id": "auto_sec_vlf8lase",
+  "description": "Auto-generated security issue",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-GitHub-Event": "push",
+    "X-GitHub-Delivery": "auto_sec_vlf8lase"
+  },
+  "payload": {
+    "ref": "refs/heads/main",
+    "after": "efv1v3x7",
+    "head_commit": {
+      "id": "k29mddwq",
+      "message": "Add API key = 8fecuzpbpz03"
+    },
+    "repository": {
+      "full_name": "me/repo"
+    }
+  },
+  "expected": {
+    "min_findings": 1,
+    "categories": [
+      "security"
+    ],
+    "min_patches": 1,
+    "allow_extra_findings": true
+  }
+}
