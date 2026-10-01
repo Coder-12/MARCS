@@ -48,17 +48,6 @@ def test_reviewer_integration_noop(tmp_path, monkeypatch):
     monkeypatch.setenv("MACRS_JOURNAL_DIR", str(journal_dir))
     monkeypatch.setenv("MACRS_BACKUP_DIR", str(backup_dir))
 
-    # *** IMPORTANT: override journal module constant ***
-    from journals import journal
-    from services import patch_applier
-
-    journal.get_journal_dir = lambda: str(journal_dir)
-    journal.get_backup_dir = lambda: str(backup_dir)
-
-    # CRITICAL FIX — override resolver functions
-    patch_applier.get_journal_dir = lambda: str(journal_dir)
-    patch_applier.get_backup_dir = lambda: str(backup_dir)
-
     event_id = "evt-noop"
     jpath = journal_dir / f"{event_id}.jsonl"
 
@@ -84,17 +73,6 @@ def test_reviewer_integration_rollback(tmp_path, monkeypatch):
 
     monkeypatch.setenv("MACRS_JOURNAL_DIR", str(journal_dir))
     monkeypatch.setenv("MACRS_BACKUP_DIR", str(backup_dir))
-
-    # *** IMPORTANT: override journal module constant ***
-    from journals import journal
-    from services import patch_applier
-
-    journal.get_journal_dir = lambda: str(journal_dir)
-    journal.get_backup_dir = lambda: str(backup_dir)
-
-    # CRITICAL FIX — override resolver functions
-    patch_applier.get_journal_dir = lambda: str(journal_dir)
-    patch_applier.get_backup_dir = lambda: str(backup_dir)
 
     event_id = "evt-rollback"
     jpath = journal_dir / f"{event_id}.jsonl"
@@ -136,17 +114,6 @@ def test_reviewer_integration_resume_commit(tmp_path, monkeypatch):
 
     monkeypatch.setenv("MACRS_JOURNAL_DIR", str(journal_dir))
     monkeypatch.setenv("MACRS_BACKUP_DIR", str(backup_dir))
-
-    # *** IMPORTANT: override journal module constant ***
-    from journals import journal
-    from services import patch_applier
-
-    journal.get_journal_dir = lambda: str(journal_dir)
-    journal.get_backup_dir = lambda: str(backup_dir)
-
-    # CRITICAL FIX — override resolver functions
-    patch_applier.get_journal_dir = lambda: str(journal_dir)
-    patch_applier.get_backup_dir = lambda: str(backup_dir)
 
     # Prepare repo file
     (repo / "hello.py").write_text("print('hello')\n")

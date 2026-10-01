@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import os
-import json
 import shutil
 import logging
 from typing import List, Dict, Any, Optional
+from journals import journal
 
 def get_journal_dir() -> str:
-    return os.environ.get("MACRS_JOURNAL_DIR", "journals")
+    return journal.get_journal_dir()
 
 def get_backup_dir() -> str:
     return os.environ.get("MACRS_BACKUP_DIR", "backups")
@@ -24,24 +24,15 @@ def _iter_journal_files() -> List[str]:
     for fn in os.listdir(get_journal_dir()):
         if fn.endswith(".jsonl"):
             out.append(os.path.join(get_journal_dir(), fn))
-    return out
+    return sorted(out)
 
 
 def _read_jsonl(path: str) -> List[Dict[str, Any]]:
-    entries = []
-    try:
-        with open(path, "r", encoding="utf-8") as fh:
-            for ln in fh:
-                ln = ln.strip()
-                if not ln:
-                    continue
-                try:
-                    entries.append(json.loads(ln))
-                except Exception:
-                    logger.exception("malformed_journal_line", path=path, line=ln[:200])
-    except FileNotFoundError:
-        return []
-    return entries
+    event_id = _journal_event_id_from_path(path)
+    expected = journal.journal_path(event_id)
+    if os.path.abspath(path) != os.path.abspath(expected):
+        raise ValueError("journal path must be inside the configured journal directory")
+    return journal.read_journal(event_id)
 
 
 def _journal_event_id_from_path(path: str) -> str:
@@ -117,7 +108,7 @@ def _copy_backup_to_target(backup_path: str, target_path: str) -> bool:
         shutil.copy2(backup_path, target_path)
         return True
     except Exception:
-        logger.exception("restore_failed", backup=backup_path, target=target_path)
+        logger.exception("restore_failed backup=%s target=%s", backup_path, target_path)
         return False
 
 
@@ -127,7 +118,7 @@ def _remove_target_path(target_path: str) -> bool:
             os.remove(target_path)
         return True
     except Exception:
-        logger.exception("remove_failed", target=target_path)
+        logger.exception("remove_failed target=%s", target_path)
         return False
 
 
@@ -159,13 +150,15 @@ def perform_rollback(event_id: str, entries: List[Dict[str, Any]]) -> Dict[str, 
             else:
                 missing.append(fname)
 
-    # append rollback marker
-    journal_path = os.path.join(get_journal_dir(), f"{event_id}.jsonl")
+    if missing:
+        raise RuntimeError(f"rollback incomplete for {event_id}: {missing}")
+
+    # Only mark a completed rollback; failed operations must remain retryable.
     try:
-        with open(journal_path, "a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"action": "rollback", "ts": "inspector"}) + "\n")
+        journal.append_entry(event_id, "rollback", {"ts": "inspector"})
     except Exception:
-        logger.exception("journal_append_failed", event_id=event_id)
+        logger.exception("journal_append_failed event_id=%s", event_id)
+        raise
 
     return {"restored": restored, "removed": removed, "missing": missing}
 
@@ -174,16 +167,10 @@ def perform_resume_commit(event_id: str, entries: List[Dict[str, Any]]) -> Dict[
     replaced = _find_entries_by_action(entries, "file_replaced")
     applied_files = [r.get("file") for r in replaced]
 
-    journal_path = os.path.join(get_journal_dir(), f"{event_id}.jsonl")
     try:
-        with open(journal_path, "a", encoding="utf-8") as fh:
-            fh.write(json.dumps({
-                "action": "commit",
-                "applied_files": applied_files,
-                "ts": "inspector"
-            }) + "\n")
+        journal.append_entry(event_id, "commit", {"applied_files": applied_files, "ts": "inspector"})
     except Exception:
-        logger.exception("journal_append_failed", event_id=event_id)
+        logger.exception("journal_append_failed event_id=%s", event_id)
         return {"ok": False}
 
     return {"applied_files": applied_files, "ok": True}
@@ -194,9 +181,7 @@ def inspect_and_recover_one(journal_path: str) -> Dict[str, Any]:
     entries = _read_jsonl(journal_path)
     decision = decide_action_for_journal(entries)
 
-    print(f"inspector_read_entries journal={journal_path}, entries={entries}")
-
-    logger.info("inspector_decision event_id={event_id}, decision={decision}")
+    logger.info("inspector_decision event_id=%s decision=%s", event_id, decision)
 
     if decision == InspectorDecision.NOOP:
         return {"event_id": event_id, "action": "noop"}
@@ -207,6 +192,8 @@ def inspect_and_recover_one(journal_path: str) -> Dict[str, Any]:
 
     if decision == InspectorDecision.RESUME_COMMIT:
         result = perform_resume_commit(event_id, entries)
+        if not result["ok"]:
+            raise RuntimeError(f"commit marker write failed for {event_id}")
         return {"event_id": event_id, "action": "resume_commit", "result": result}
 
     return {"event_id": event_id, "action": "noop"}
@@ -218,8 +205,9 @@ def scan_and_recover_all() -> List[Dict[str, Any]]:
         try:
             rec = inspect_and_recover_one(jp)
             out.append(rec)
-        except Exception:
-            logger.exception("inspect_failed", journal=jp)
+        except Exception as exc:
+            logger.exception("inspect_failed journal=%s", jp)
+            out.append({"event_id": _journal_event_id_from_path(jp), "action": "error", "error": str(exc)})
     return out
 
 

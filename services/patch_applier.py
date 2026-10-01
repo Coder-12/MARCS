@@ -282,7 +282,6 @@ def apply_patches(
 
     # Validate availability of target files and dry-run apply
     to_apply = []
-    print(f"_parsed_by_file: {parsed_by_file}")
     for fname, parsed in parsed_by_file.items():
         target_path = os.path.join(repo_root, fname)
         if not os.path.exists(target_path):
@@ -293,7 +292,6 @@ def apply_patches(
                 orig_text = fh.read()
 
         # remove BOMs and DO NOT allow leading empty line
-        print(f"_orig_text: {orig_text}")
         cleaned = orig_text.lstrip("\ufeff")
         # remove ONLY ONE accidental leading newline, not all
         if cleaned.startswith("\n"):

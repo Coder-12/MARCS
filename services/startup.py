@@ -21,6 +21,8 @@ def run_startup_inspector() -> None:
     """
     Run the journal inspector once at startup. Safe: NOOP if disabled.
     If INSPECTOR_DRY is True, we compute decisions but do not mutate journals.
+    Dry-run journal errors are logged and reported individually; valid journals
+    are still inspected and startup continues without recovering corrupt history.
     Results are stored in-memory (get_last_startup_decisions) for health endpoint reporting.
     """
     global _last_startup_decisions
@@ -36,9 +38,13 @@ def run_startup_inspector() -> None:
     if INSPECTOR_DRY:
         # safe dry run: inspect and decide, but do not mutate journals
         for jp in journal_inspector._iter_journal_files():
-            entries = journal_inspector._read_jsonl(jp)
-            decision = journal_inspector.decide_action_for_journal(entries)
-            _last_startup_decisions.append({"journal": jp, "decision": decision})
+            try:
+                entries = journal_inspector._read_jsonl(jp)
+                decision = journal_inspector.decide_action_for_journal(entries)
+                _last_startup_decisions.append({"journal": jp, "decision": decision})
+            except Exception as exc:
+                logger.exception("startup_journal_inspection_failed journal=%s", jp)
+                _last_startup_decisions.append({"journal": jp, "decision": "error", "error": str(exc)})
         return
 
     # Full recover (may append commit/rollback entries)

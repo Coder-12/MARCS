@@ -3,7 +3,7 @@
 # 🔵 MARCS
 ### Multi-Agent Code Review System
 
-**Crash-Safe • Journaled • Deterministic • AI-Ready**
+**Journaled • LLM-Assisted • Code Review**
 
 <br/>
 
@@ -11,14 +11,14 @@
 
 <br/>
 
-[![Tests](https://img.shields.io/badge/tests-179%20passed-brightgreen?style=for-the-badge)](.)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge)](.)
+[Baseline validation evidence](docs/baseline_integrity.md)
+[![Python](https://img.shields.io/badge/Python-3.12.5%20tested-blue?style=for-the-badge)](.)
 [![License](https://img.shields.io/badge/license-MIT-purple?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/status-Complete-success?style=for-the-badge)](.)
+[![Status](https://img.shields.io/badge/status-Research-blue?style=for-the-badge)](.)
 
 <br/>
 
-**MARCS is a crash-safe, deterministic multi-agent code review system that integrates LLM reasoning with journaled patch application, safety analysis, and fully reproducible workflows.**
+**MARCS is a multi-agent code review system that integrates LLM reasoning with journaled patch application and pattern-based safety analysis.**
 
 </div>
 
@@ -26,9 +26,9 @@
 
 ## 🚀 Overview
 
-MARCS is a production-grade, LLM-powered code review orchestrator with crash-safe patch application, structured journaling, deterministic execution, safety scanning, and full HTML artifact reporting.
+MARCS is a research code review orchestrator with LLM integration, journaled patch application, recovery logic, safety scanning, and HTML artifact reporting. Production readiness has not been established.
 
-Inspired by CI/CD systems, database recovery mechanisms, and multi-agent tooling — MARCS brings *reliability* to AI-driven code modification.
+Inspired by CI/CD systems, database recovery mechanisms, and multi-agent tooling — MARCS explores recovery and traceability for AI-driven code modification.
 
 ---
 
@@ -36,30 +36,30 @@ Inspired by CI/CD systems, database recovery mechanisms, and multi-agent tooling
 
 - Automated PR review for high-volume engineering teams
 - Enterprise code quality pipelines
-- Safe LLM-generated patch application
+- Journaled LLM-generated patch application
 - Security-aware code transformations
-- Deterministic AI agents (no nondeterministic runs)
+- Demo and mocked agent workflows; live LLM inference is not established as deterministic
 - Research environment for multi-agent development workflows
 
 ---
 
 ## 🧰 Tech Stack
 
-**Python · FastAPI · AsyncIO · Structured Logging · LLM Integration · Unified Diff Engine · Crash-Safe Journaling**
+**Python · FastAPI · AsyncIO · Structured Logging · LLM Integration · Unified Diff Engine · JSONL Journaling**
 
 ---
 
 ## ✨ Key Features
 
 - ✅ **Multi-Agent Reviewer** (LLM-backed or demo)
-- ✅ **Crash-Safe Patch Application** (journal + rollback + resume)
-- ✅ **Deterministic Execution** (no "LLM randomness corruption")
+- ✅ **Journaled Patch Application** (journal + rollback + resume)
+- ✅ **Demo/Fake LLM Modes** for local testing
 - ✅ **Safety Engine** (detects eval/exec/os.system/shell=True/etc.)
 - ✅ **Unified Diff Previews**
 - ✅ **HTML Artifact Reports**
-- ✅ **Full Backup Layer**
+- ✅ **File Backups** for existing patch targets
 - ✅ **Webhook Integration** (GitHub-compatible)
-- ✅ **179 Tests** — end-to-end coverage
+- ✅ **Automated Tests** — measured results and limits in [baseline evidence](docs/baseline_integrity.md)
 - ✅ **Minimal Dependencies** & clean architecture
 - ✅ **Structured Logging & Tracing** (trace IDs & spans)
 
@@ -74,11 +74,11 @@ marcs/
 ├── orchestration/       # Orchestrator, safety engine
 ├── services/            # Reviewer + patch applier
 ├── worker/              # Async queue worker
-├── journals/            # Crash-safe execution logs
+├── journals/            # Journal source and runtime JSONL logs
 ├── backups/             # Automatic file backups
 ├── artifacts/           # HTML + JSON outputs
 ├── scripts/             # CLI tools & demos
-└── tests/               # 179 tests with full coverage
+└── tests/               # Automated tests (coverage not measured)
 ```
 
 ---
@@ -114,7 +114,7 @@ marcs/
    │  • Generates Patch Suggestions         │
    │  • Safety Scan (eval/exec/etc)         │
    │  • Preview Rendering                   │
-   │  • Crash-Safe Apply (Journal)          │
+   │  • Journaled Patch Apply              │
    │  • Backup + Commit                     │
    │  • Artifact Writer (JSON + HTML)       │
    └────────────────────┬───────────────────┘
@@ -132,19 +132,22 @@ marcs/
 
 ### Requirements
 
-**Python 3.9+**  
+**Python 3.12.5 validated for the Slice 0 baseline**
+
 macOS / Linux recommended
 
 ### 1. Install
 
 ```bash
-pip install -r requirements.txt
+python -m venv venv
+source venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
 ### 2. Initialize MARCS
 
 ```bash
-./scripts/init_marcs.sh
+bash scripts/init_macrs.sh
 ```
 
 ### 3. Create Demo Repository
@@ -190,7 +193,7 @@ echo "print('hello')" > demo-repo/hello.py
   --dry-run
 ```
 
-### Real Apply (Crash-Safe Commit)
+### Real Apply (Journaled Commit)
 
 ```bash
 ./scripts/demo_orchestrator.py \
@@ -207,7 +210,7 @@ echo "print('hello')" > demo-repo/hello.py
 [orchestrator] apply_success → applied: hello.py
 [orchestrator] report_generated → artifacts/evt-demo/report.html
 
-✓ Done — safe, deterministic, crash-safe apply complete.
+✓ Patch application complete; inspect the journal and report.
 ```
 
 ---
@@ -241,8 +244,8 @@ python3 scripts/run_inspector.py
 **Inspector can:**
 
 - Resume partially applied operations
-- Roll back corrupted operations
-- Validate journal integrity
+- Attempt rollback based on recorded backups and replacements
+- Reject malformed JSONL records before recovery
 
 ---
 
@@ -278,17 +281,18 @@ journals/
   └── <event_id>.jsonl
 ```
 
-All runs are traceable, reproducible, and auditable.
+These artifacts support inspection of a run; they do not establish global reproducibility or recovery guarantees.
 
 ---
 
 ## 🧪 Tests
 
 ```bash
-pytest -q
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
 ```
 
-**✅ 179 tests passed**
+See [Slice 0 baseline evidence](docs/baseline_integrity.md) for exact measured counts, dependency versions, and remaining limitations. Coverage was not measured. Run the offline baseline without live credentials or a local `.env`; the live reviewer smoke test skips when `OPENAI_API_KEY` is absent.
 
 **Covers:**
 
@@ -298,7 +302,7 @@ pytest -q
 - HTML reports
 - End-to-end orchestration
 - Worker + queue
-- Deterministic patch application
+- Patch application
 
 ---
 
@@ -362,7 +366,7 @@ AI/ML/GenAI Engineer • Multi-Agent Systems • LLM Infrastructure
 
 ## ⭐ If MARCS impressed you, please star the repo!
 
-**Built with precision for robustness, safety, determinism, and correctness.**
+**Built to explore journaled review and recovery workflows.**
 
 Made with ❤️ for the future of AI-powered development tools.
 

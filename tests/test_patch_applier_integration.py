@@ -30,4 +30,4 @@ def test_apply_create_new_file(tmp_path):
     assert 'def hello' in content
     # confirm journal commit
     j = journal.read_journal(event_id)
-    assert any(e["op"] == "commit" for e in j)
+    assert any(e["action"] == "commit" for e in j)

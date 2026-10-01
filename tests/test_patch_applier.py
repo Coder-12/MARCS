@@ -54,4 +54,4 @@ def test_apply_patches_dry_run_and_apply(tmp_path):
     assert os.path.exists(bdir)
     # journal exists and has entries
     j = journal.read_journal(event_id)
-    assert any(e["op"] == "commit" for e in j)
+    assert any(e["action"] == "commit" for e in j)

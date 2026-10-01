@@ -23,6 +23,8 @@ backups/*
 
 journals/*
 !journals/.gitkeep
+!journals/__init__.py
+!journals/journal.py
 
 logs/*
 !logs/.gitkeep

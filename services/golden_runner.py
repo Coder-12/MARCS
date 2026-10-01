@@ -116,8 +116,7 @@ async def run_all(path_glob: str = "data/golden/v1/*.json", dry_run: bool = Fals
 
 
 def cli(path_glob: str = "data/golden/v1/*.json", dry_run: bool = False):
-    loop = asyncio.get_event_loop()
-    results = loop.run_until_complete(run_all(path_glob, dry_run=dry_run))
+    results = asyncio.run(run_all(path_glob, dry_run=dry_run))
     ok = sum(1 for r in results if r.get("ok"))
     total = len(results)
     print(f"Golden runner: {ok}/{total} passed")

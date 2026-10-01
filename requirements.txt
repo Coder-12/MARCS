@@ -1,13 +1,11 @@
 fastapi
 uvicorn
-
-pydantic
+pydantic>=2
 python-dotenv
-
-psycopg2-binary
-
-redis
-
-rq    # For background worker jobs (simple, reliable)
-
 pydantic-settings
+structlog
+aiohttp
+httpx
+asyncpg
+async-timeout
+redis
