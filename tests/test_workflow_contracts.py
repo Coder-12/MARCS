@@ -10,6 +10,8 @@ from orchestration.contracts import (
     FailureCategory,
     ModifyFileChange,
     PatchOperation,
+    PatchApplyResult,
+    PatchApplyStatus,
     PatchProposal,
     Plan,
     RepoProfile,
@@ -53,6 +55,8 @@ def model_examples():
         (ModifyFileChange, copy.deepcopy(MODIFY)),
         (CreateFileChange, copy.deepcopy(CREATE)),
         (PatchProposal, patch_payload()),
+        (PatchApplyResult, {"patch_id": "patch-1", "status": "success", "unified_diff": "--- a/a.py\n+++ b/a.py\n",
+                            "files_modified": ["a.py"]}),
         (ValidationResult, {"patch_id": "patch-1", "argv": ["python"], "exit_code": 0, "duration_ms": 0}),
         (ReviewFinding, {"message": "Missing coverage"}),
         (ReviewResult, {"patch_id": "patch-1", "decision": "approve", "summary": "Candidate accepted"}),
@@ -92,6 +96,7 @@ def test_task_type_serialized_values(task_type):
 @pytest.mark.parametrize("model,payload,field", [
     (TaskSpec, TASK, "task_type"),
     (ModifyFileChange, MODIFY, "operation"),
+    (PatchApplyResult, {"patch_id": "patch-1", "error": "Invalid proposal"}, "status"),
     (WorkflowState, {"run_id": "run-1", "task": TASK}, "status"),
     (WorkflowState, {"run_id": "run-1", "task": TASK}, "failure_category"),
     (ReviewResult, {"patch_id": "patch-1", "decision": "approve", "summary": "OK"}, "decision"),
@@ -103,6 +108,7 @@ def test_unknown_enum_values_are_rejected(model, payload, field):
 
 @pytest.mark.parametrize("model,payload,field,value", [
     (TaskSpec, TASK, "task_type", b"feature"),
+    (PatchApplyResult, {"patch_id": "patch-1", "error": "Invalid proposal"}, "status", b"validation_failed"),
     (WorkflowState, {"run_id": "run-1", "task": TASK}, "status", b"running"),
     (WorkflowState, {"run_id": "run-1", "task": TASK}, "failure_category", b"tool_error"),
     (ReviewResult, {"patch_id": "patch-1", "summary": "OK"}, "decision", b"approve"),
@@ -164,6 +170,7 @@ def test_invalid_paths_rejected_at_all_path_boundaries(path):
         (ModifyFileChange, {**MODIFY, "path": path}),
         (CreateFileChange, {**CREATE, "path": path}),
         (ReviewFinding, {"message": "Concern", "path": path}),
+        (PatchApplyResult, {"patch_id": "patch-1", "status": "apply_failed", "error": "Write failed", "files_modified": [path]}),
     ]
     for model, payload in examples:
         with pytest.raises(ValidationError):
@@ -518,12 +525,54 @@ def test_rejected_aggregate_assignment_preserves_valid_candidate_state():
         assert state.model_dump(mode="json") == before
 
 
-@pytest.mark.parametrize("model", [PatchProposal, ValidationResult, ReviewResult, WorkflowState])
+@pytest.mark.parametrize("model", [PatchProposal, PatchApplyResult, ValidationResult, ReviewResult, WorkflowState])
 def test_workflow_json_schema_is_serializable(model):
     schema = model.model_json_schema()
     assert json.loads(json.dumps(schema)) == schema
     if model in (ValidationResult, ReviewResult):
         assert "patch_id" in schema["required"]
+
+
+@pytest.mark.parametrize("status", list(PatchApplyStatus))
+def test_patch_application_result_status_and_json_round_trip(status):
+    payload = {"patch_id": "patch-1", "status": status.value}
+    if status == PatchApplyStatus.SUCCESS:
+        payload.update(unified_diff="--- a/a.py\n+++ b/a.py\n", files_modified=["z.py", "a.py"])
+    else:
+        payload["error"] = "Candidate rejected"
+    result = PatchApplyResult.model_validate(payload)
+    assert result.status == status
+    assert result.files_modified == sorted(result.files_modified)
+    assert PatchApplyResult.model_validate(json.loads(json.dumps(result.model_dump(mode="json")))) == result
+
+
+@pytest.mark.parametrize("overrides", [
+    {"patch_id": None}, {"patch_id": " "}, {"error": "Unexpected error"},
+    {"files_modified": []}, {"files_modified": ["a.py", "a.py"]}, {"unified_diff": ""},
+])
+def test_incoherent_patch_application_success_rejected(overrides):
+    with pytest.raises(ValidationError):
+        PatchApplyResult.model_validate({"patch_id": "patch-1", "status": "success",
+                                        "unified_diff": "diff", "files_modified": ["a.py"], **overrides})
+
+
+@pytest.mark.parametrize("status", ["validation_failed", "apply_failed"])
+@pytest.mark.parametrize("error", [None, "", " \t"])
+def test_patch_application_failure_requires_diagnostic(status, error):
+    with pytest.raises(ValidationError):
+        PatchApplyResult(patch_id="patch-1", status=status, error=error)
+
+
+def test_patch_application_failure_cannot_report_canonical_diff_or_validation_writes():
+    for status in ("validation_failed", "apply_failed"):
+        with pytest.raises(ValidationError):
+            PatchApplyResult(patch_id="patch-1", status=status, error="Failed", unified_diff="partial diff")
+    with pytest.raises(ValidationError):
+        PatchApplyResult(patch_id="patch-1", status="validation_failed", error="Failed", files_modified=["a.py"])
+    with pytest.raises(ValidationError):
+        PatchApplyResult(patch_id=None, status="apply_failed", error="Failed")
+    assert PatchApplyResult(patch_id=None, status="validation_failed", error="Invalid identity").patch_id is None
+    assert PatchApplyResult(patch_id="patch-1", status="apply_failed", error="Failed", files_modified=["a.py"]).files_modified == ["a.py"]
 
 
 def test_existing_v1_contracts_remain_independent_and_constructible():

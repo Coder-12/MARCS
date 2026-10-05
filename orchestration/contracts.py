@@ -83,6 +83,12 @@ class PatchOperation(str, Enum):
     CREATE = "create"
 
 
+class PatchApplyStatus(str, Enum):
+    SUCCESS = "success"
+    VALIDATION_FAILED = "validation_failed"
+    APPLY_FAILED = "apply_failed"
+
+
 class WorkflowStatus(str, Enum):
     RUNNING = "running"
     SUCCESS = "success"
@@ -217,6 +223,46 @@ class PatchProposal(_Contract):
         if len(paths) != len(set(paths)):
             raise ValueError("duplicate file paths in patch proposal")
         return value
+
+
+class PatchApplyResult(_Contract):
+    """Workspace-only outcome. Discard an apply_failed candidate; no rollback.
+
+    patch_id is null only when invalid input cannot be attributed. Failure diffs
+    are empty; files_modified on apply failure lists completed writes only.
+    Completeness of successful evidence is established by the patch service.
+    """
+
+    patch_id: _NonBlank | None
+    status: Annotated[PatchApplyStatus, Field(strict=False), BeforeValidator(_enum_text)]
+    unified_diff: _Text = ""
+    files_modified: list[_RepoPath] = Field(default_factory=list)
+    error: _NonBlank | None = None
+
+    @field_validator("files_modified")
+    @classmethod
+    def ordered_unique_paths(cls, value: list[str]) -> list[str]:
+        if len(value) != len(set(value)):
+            raise ValueError("duplicate modified paths")
+        return sorted(value)
+
+    @model_validator(mode="before")
+    @classmethod
+    def coherent_result(cls, data: object) -> object:
+        if isinstance(data, dict):
+            status = data.get("status")
+            diff, files, error = data.get("unified_diff", ""), data.get("files_modified", []), data.get("error")
+            if status == PatchApplyStatus.SUCCESS:
+                if data.get("patch_id") is None or error is not None or not diff or not files:
+                    raise ValueError("success requires identity, diff, changed files, and no error")
+            elif status in (PatchApplyStatus.VALIDATION_FAILED, PatchApplyStatus.APPLY_FAILED):
+                if error is None or diff:
+                    raise ValueError("failure requires an error and no canonical diff")
+                if status == PatchApplyStatus.APPLY_FAILED and data.get("patch_id") is None:
+                    raise ValueError("application failure requires candidate identity")
+                if status == PatchApplyStatus.VALIDATION_FAILED and files:
+                    raise ValueError("validation failure must not report writes")
+        return data
 
 
 class ValidationResult(ValidationCommand):
