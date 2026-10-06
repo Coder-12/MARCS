@@ -136,6 +136,137 @@ class RepoProfile(_Contract):
     important_dirs: list[_RepoPath] = Field(default_factory=list)
 
 
+class RepositoryEntryKind(str, Enum):
+    FILE = "file"
+    DIRECTORY = "directory"
+    SYMLINK = "symlink"
+
+
+class RepositoryEntry(_Contract):
+    """Neutral structural entry; no symlink target or absolute location."""
+
+    path: _RepoPath
+    kind: Annotated[RepositoryEntryKind, Field(strict=False), BeforeValidator(_enum_text)]
+    size_bytes: Annotated[int, Field(ge=0)] | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def coherent_size(cls, data: object) -> object:
+        if isinstance(data, dict):
+            kind, size = data.get("kind"), data.get("size_bytes")
+            if kind == RepositoryEntryKind.FILE and size is None:
+                raise ValueError("regular file requires size_bytes")
+            if kind in (RepositoryEntryKind.DIRECTORY, RepositoryEntryKind.SYMLINK) and size is not None:
+                raise ValueError("size_bytes describes regular files only")
+        return data
+
+
+class RepositoryInventory(_Contract):
+    """Deterministic partial tree. Counts cover visited entries, not guessed totals."""
+
+    entries: list[RepositoryEntry] = Field(default_factory=list)
+    truncated: bool = False
+    excluded_policy_count: int = Field(default=0, ge=0)
+    unsupported_entry_count: int = Field(default=0, ge=0)
+    unreadable_entry_count: int = Field(default=0, ge=0)
+    warnings: list[_NonBlank] = Field(default_factory=list)
+
+    @property
+    def entries_returned(self) -> int:
+        return len(self.entries)
+
+
+class RepositoryText(_Contract):
+    """Exact bounded source text, with inclusive LF-based source line numbers.
+
+    Empty output represents no lines (both bounds null). A truncated end_line
+    may be a partial final line; no marker is inserted into content.
+    """
+
+    path: _RepoPath
+    content: _Text
+    start_line: _PositiveInt | None = None
+    end_line: _PositiveInt | None = None
+    truncated: bool = False
+
+    @model_validator(mode="before")
+    @classmethod
+    def coherent_lines(cls, data: object) -> object:
+        if isinstance(data, dict):
+            content, start, end = data.get("content"), data.get("start_line"), data.get("end_line")
+            if (start is None) != (end is None) or (content == "" and start is not None):
+                raise ValueError("empty text has no lines; otherwise line bounds are paired")
+            if isinstance(content, str) and content and start is None:
+                raise ValueError("represented text requires line attribution")
+            if isinstance(start, int) and isinstance(end, int) and start > end:
+                raise ValueError("start_line must not exceed end_line")
+        return data
+
+
+class RepositoryFactEvidence(_Contract):
+    """Deterministic profile attribution, separate from task retrieval evidence."""
+
+    field: Literal["language", "framework", "test_framework", "important_dirs"]
+    value: _NonBlank
+    path: _RepoPath | None = None
+    reason: _NonBlank
+
+
+class RepositoryAnalysisResult(_Contract):
+    """Observed Python-MVP facts and bounded discoveries, without task ranking."""
+
+    profile: RepoProfile
+    inventory: RepositoryInventory
+    test_files: list[_RepoPath] = Field(default_factory=list)
+    config_files: list[_RepoPath] = Field(default_factory=list)
+    readme_excerpt: RepositoryText | None = None
+    evidence: list[RepositoryFactEvidence] = Field(default_factory=list)
+    warnings: list[_NonBlank] = Field(default_factory=list)
+    truncated: bool = False
+
+    @property
+    def files_considered(self) -> int:
+        """Regular files in the returned policy inventory, not files executed/read."""
+        return sum(entry.kind == RepositoryEntryKind.FILE for entry in self.inventory.entries)
+
+
+class SearchBackend(str, Enum):
+    RIPGREP = "ripgrep"
+    PYTHON = "python"
+
+
+class CodeSearchMatch(_Contract):
+    path: _RepoPath
+    line_number: _PositiveInt
+    line: _Text
+    line_truncated: bool = False
+
+
+class CodeSearchResult(_Contract):
+    """Neutral literal matches. Backend determines native versus explicit ignores.
+
+    files_considered counts known prefiltered candidates, not files rg opened.
+    files_skipped counts prefilter regular-file size/read/UTF-8 failures.
+    """
+
+    query: _NonBlank
+    case_sensitive: bool
+    backend: Annotated[SearchBackend, Field(strict=False), BeforeValidator(_enum_text)]
+    matches: list[CodeSearchMatch] = Field(default_factory=list)
+    truncated: bool = False
+    files_considered: int = Field(default=0, ge=0)
+    files_skipped: int = Field(default=0, ge=0)
+    warnings: list[_NonBlank] = Field(default_factory=list)
+    fallback_reason: _NonBlank | None = None
+
+    @field_validator("query")
+    @classmethod
+    def literal_line_query(cls, value: str) -> str:
+        if any(char in value for char in ("\x00", "\n", "\r")):
+            raise ValueError("query must be one literal non-NUL line")
+        return value
+
+
 class RetrievedEvidence(_Contract):
     """Attributed whole-file context or an inclusive, both-or-neither line range."""
 

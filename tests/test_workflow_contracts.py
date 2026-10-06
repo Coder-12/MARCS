@@ -15,6 +15,15 @@ from orchestration.contracts import (
     PatchProposal,
     Plan,
     RepoProfile,
+    RepositoryEntryKind,
+    RepositoryEntry,
+    RepositoryInventory,
+    RepositoryText,
+    RepositoryFactEvidence,
+    RepositoryAnalysisResult,
+    SearchBackend,
+    CodeSearchMatch,
+    CodeSearchResult,
     RetrievedEvidence,
     ReviewDecision,
     ReviewFinding,
@@ -49,6 +58,13 @@ def model_examples():
     return [
         (TaskSpec, copy.deepcopy(TASK)),
         (RepoProfile, {}),
+        (RepositoryEntry, {"path": "a.py", "kind": "file", "size_bytes": 0}),
+        (RepositoryInventory, {}),
+        (RepositoryText, {"path": "a.py", "content": "line", "start_line": 1, "end_line": 1}),
+        (RepositoryFactEvidence, {"field": "language", "value": "python", "path": "a.py", "reason": "Observed source"}),
+        (RepositoryAnalysisResult, {"profile": {}, "inventory": {}}),
+        (CodeSearchMatch, {"path": "a.py", "line_number": 1, "line": "line"}),
+        (CodeSearchResult, {"query": "line", "case_sensitive": False, "backend": "python"}),
         (RetrievedEvidence, {"path": "src/parser.py", "content": "", "reason": "Task target"}),
         (ValidationCommand, {"argv": ["python", "-m", "pytest"]}),
         (Plan, {}),
@@ -525,7 +541,9 @@ def test_rejected_aggregate_assignment_preserves_valid_candidate_state():
         assert state.model_dump(mode="json") == before
 
 
-@pytest.mark.parametrize("model", [PatchProposal, PatchApplyResult, ValidationResult, ReviewResult, WorkflowState])
+@pytest.mark.parametrize("model", [PatchProposal, PatchApplyResult, ValidationResult, ReviewResult, WorkflowState,
+                                   RepositoryEntry, RepositoryInventory, RepositoryText, RepositoryFactEvidence,
+                                   RepositoryAnalysisResult, CodeSearchMatch, CodeSearchResult])
 def test_workflow_json_schema_is_serializable(model):
     schema = model.model_json_schema()
     assert json.loads(json.dumps(schema)) == schema
@@ -573,6 +591,42 @@ def test_patch_application_failure_cannot_report_canonical_diff_or_validation_wr
         PatchApplyResult(patch_id=None, status="apply_failed", error="Failed")
     assert PatchApplyResult(patch_id=None, status="validation_failed", error="Invalid identity").patch_id is None
     assert PatchApplyResult(patch_id="patch-1", status="apply_failed", error="Failed", files_modified=["a.py"]).files_modified == ["a.py"]
+
+
+@pytest.mark.parametrize("kind", list(RepositoryEntryKind))
+def test_repository_entry_metadata_is_typed_and_json_serializable(kind):
+    entry = RepositoryEntry(path="item", kind=kind.value, size_bytes=12 if kind == RepositoryEntryKind.FILE else None)
+    assert entry.model_dump(mode="json")["kind"] == kind.value
+
+
+@pytest.mark.parametrize("kind,size", [("file", None), ("file", -1), ("file", True), ("directory", 1), ("symlink", 1), ("unknown", None), (b"file", 1)])
+def test_invalid_repository_entry_metadata_rejected(kind, size):
+    with pytest.raises(ValidationError):
+        RepositoryEntry(path="item", kind=kind, size_bytes=size)
+
+
+@pytest.mark.parametrize("content,start,end", [("line", None, None), ("", 1, 1), ("line", 0, 1), ("line", 2, 1), ("line", 1, None)])
+def test_repository_text_line_attribution_is_coherent(content, start, end):
+    with pytest.raises(ValidationError):
+        RepositoryText(path="a.py", content=content, start_line=start, end_line=end)
+
+
+@pytest.mark.parametrize("backend", ["unknown", b"python"])
+def test_search_backend_is_a_strict_stable_enum(backend):
+    with pytest.raises(ValidationError):
+        CodeSearchResult(query="line", case_sensitive=False, backend=backend)
+
+
+def test_repository_metrics_are_derived_without_duplicate_count_fields():
+    inventory = RepositoryInventory(entries=[RepositoryEntry(path="a.py", kind="file", size_bytes=1)])
+    analysis = RepositoryAnalysisResult(profile=RepoProfile(), inventory=inventory)
+    assert inventory.entries_returned == 1 and analysis.files_considered == 1
+    with pytest.raises(ValidationError):
+        RepositoryInventory(entries_returned=99)
+    with pytest.raises(ValidationError):
+        CodeSearchMatch(path="a.py", line_number=0, line="line")
+    with pytest.raises(ValidationError):
+        CodeSearchResult(query="a\nb", case_sensitive=False, backend=SearchBackend.PYTHON)
 
 
 def test_existing_v1_contracts_remain_independent_and_constructible():
