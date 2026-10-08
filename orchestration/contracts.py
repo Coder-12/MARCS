@@ -400,14 +400,29 @@ class ValidationResult(ValidationCommand):
     """One candidate's command result; passed is derived, not stored separately."""
 
     patch_id: _NonBlank
-    exit_code: int
+    exit_code: int | None
     stdout: _Text = ""
     stderr: _Text = ""
     duration_ms: float = Field(ge=0)
+    timed_out: bool = False
+    stdout_truncated: bool = False
+    stderr_truncated: bool = False
+
+    @model_validator(mode="before")
+    @classmethod
+    def coherent_completion(cls, data: object) -> object:
+        # Before validation also protects assignment: rejection preserves the old state.
+        if isinstance(data, dict):
+            timed_out, exit_code = data.get("timed_out", False), data.get("exit_code")
+            if timed_out is True and exit_code is not None:
+                raise ValueError("timeout requires exit_code=None")
+            if timed_out is False and exit_code is None:
+                raise ValueError("normal completion requires an integer exit_code")
+        return data
 
     @property
     def passed(self) -> bool:
-        return self.exit_code == 0
+        return not self.timed_out and self.exit_code == 0
 
 
 class ReviewFinding(_Contract):

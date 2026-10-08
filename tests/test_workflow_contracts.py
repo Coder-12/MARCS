@@ -287,6 +287,44 @@ def test_invalid_validation_result_numbers(field, value):
         ValidationResult(**{**{"patch_id": "patch-1", "argv": ["python"], "exit_code": 0, "duration_ms": 0}, field: value})
 
 
+@pytest.mark.parametrize("timed_out,exit_code", [(False, 0), (False, 1), (False, -9), (True, None)])
+def test_validation_completion_json_roundtrip_and_schema(timed_out, exit_code):
+    result = ValidationResult(patch_id="patch-1", argv=["python", "-m", "pytest"],
+        exit_code=exit_code, timed_out=timed_out, duration_ms=1,
+        stdout="α", stderr="β", stdout_truncated=True, stderr_truncated=True)
+    assert result.passed is (not timed_out and exit_code == 0)
+    assert "passed" not in result.model_dump(mode="json")
+    assert ValidationResult.model_validate(json.loads(json.dumps(result.model_dump(mode="json")))) == result
+    assert json.loads(json.dumps(ValidationResult.model_json_schema()))["properties"]["timed_out"]["default"] is False
+
+
+@pytest.mark.parametrize("extra", [
+    {"timed_out": False, "exit_code": None}, {"timed_out": True, "exit_code": 0},
+    {"timed_out": True, "exit_code": -9}, {"timed_out": "false"}, {"timed_out": 1},
+    {"stdout_truncated": 1}, {"stderr_truncated": "false"},
+])
+def test_invalid_validation_completion_states(extra):
+    with pytest.raises(ValidationError):
+        ValidationResult(**{"patch_id": "patch-1", "argv": ["pytest"], "exit_code": 0, "duration_ms": 0, **extra})
+
+
+@pytest.mark.parametrize("timed_out,exit_code,field,value", [
+    (False, 0, "timed_out", True), (False, 0, "exit_code", None),
+    (True, None, "timed_out", False), (True, None, "exit_code", 0),
+])
+def test_rejected_validation_assignment_preserves_coherent_state(timed_out, exit_code, field, value):
+    result = ValidationResult(patch_id="patch-1", argv=["pytest"], timed_out=timed_out,
+                              exit_code=exit_code, duration_ms=0)
+    before = result.model_dump(mode="json")
+    with pytest.raises(ValidationError):
+        setattr(result, field, value)
+    assert result.model_dump(mode="json") == before
+    # Deliberate bypasses still fail at the model boundary.
+    result.__dict__[field] = value
+    with pytest.raises(ValidationError):
+        ValidationResult.model_validate(result)
+
+
 @pytest.mark.parametrize("decision", list(ReviewDecision))
 def test_review_dispositions(decision):
     review = ReviewResult(patch_id="patch-1", decision=decision.value, summary="Review explanation",
